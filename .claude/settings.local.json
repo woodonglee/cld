@@ -1,0 +1,12 @@
+{
+  "model": "opusplan",
+  "permissions": {
+    "allow": [
+      "Bash"
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash C:/Users/wd/.claude/statusline-command.sh"
+  }
+}
