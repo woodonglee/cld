@@ -3,8 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
@@ -18,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "모던 웹 스타터킷",
-  description: "Next.js + shadcn/ui + Tailwind CSS 기반 범용 스타터킷",
+  title: "로또 이벤트 플랫폼",
+  description: "가변 규칙 기반 로또 이벤트 운영 플랫폼",
 };
 
 export default function RootLayout({
@@ -39,9 +37,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TooltipProvider>
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
+            {children}
             <Toaster />
           </TooltipProvider>
         </ThemeProvider>

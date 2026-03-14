@@ -1,14 +1,6 @@
-import { Hero } from "@/components/sections/Hero";
-import { Features } from "@/components/sections/Features";
-import { CTA } from "@/components/sections/CTA";
-
-// 랜딩 페이지 — Hero → Features → CTA 순서로 섹션 조합
+// 초기화된 빈 페이지 — 새로운 서비스 개발의 시작점
 export default function Home() {
   return (
-    <>
-      <Hero />
-      <Features />
-      <CTA />
-    </>
+    <main className="min-h-screen bg-white" />
   );
 }
