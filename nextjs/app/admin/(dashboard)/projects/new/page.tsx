@@ -1,7 +1,7 @@
 "use client";
 
 // 프로젝트 생성 — 4단계 스텝 폼 위저드
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -29,6 +29,17 @@ interface FormState {
   ad_chance_period_minutes: number;
 }
 
+// pick_count별 기본 상금 테이블 (rank 순)
+const PRIZE_TABLE = [1000000, 100000, 10000, 1000, 500, 100];
+
+function generateDefaultPolicies(pickCount: number): RewardPolicyInput[] {
+  return Array.from({ length: pickCount }, (_, i) => ({
+    match_count: pickCount - i,
+    prize_amount: PRIZE_TABLE[i] ?? 100,
+    prize_label: `${i + 1}등`,
+  }));
+}
+
 const defaultForm: FormState = {
   name: "",
   number_min: 1,
@@ -36,11 +47,7 @@ const defaultForm: FormState = {
   pick_count: 6,
   draw_interval_minutes: 10080,
   draw_start_at: "",
-  reward_policies: [
-    { match_count: 6, prize_amount: 1000000, prize_label: "1등" },
-    { match_count: 5, prize_amount: 100000, prize_label: "2등" },
-    { match_count: 4, prize_amount: 10000, prize_label: "3등" },
-  ],
+  reward_policies: generateDefaultPolicies(6),
   free_chances_per_period: 1,
   free_chance_period_minutes: 60,
   ad_chances_per_period: 2,
@@ -53,35 +60,50 @@ export default function AdminProjectNewPage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<FormState>(defaultForm);
+  const [isPoliciesAtDefault, setIsPoliciesAtDefault] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
-  const addPolicy = () =>
+  const addPolicy = () => {
+    setIsPoliciesAtDefault(false);
     set("reward_policies", [
       ...form.reward_policies,
       { match_count: 0, prize_amount: 0, prize_label: "" },
     ]);
+  };
 
-  const removePolicy = (idx: number) =>
+  const removePolicy = (idx: number) => {
+    setIsPoliciesAtDefault(false);
     set("reward_policies", form.reward_policies.filter((_, i) => i !== idx));
+  };
 
   const updatePolicy = (
     idx: number,
     field: keyof RewardPolicyInput,
     value: string | number
-  ) =>
+  ) => {
+    setIsPoliciesAtDefault(false);
     set(
       "reward_policies",
       form.reward_policies.map((p, i) => (i === idx ? { ...p, [field]: value } : p))
     );
+  };
 
-  const [submitting, setSubmitting] = useState(false);
+  // pick_count 변경 시 기본 정책 자동 갱신 (수동 수정하지 않은 경우만)
+  useEffect(() => {
+    if (isPoliciesAtDefault) {
+      setForm((prev) => ({
+        ...prev,
+        reward_policies: generateDefaultPolicies(prev.pick_count),
+      }));
+    }
+  }, [form.pick_count, isPoliciesAtDefault]);
 
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      // draw_start_at을 ISO 8601 형식으로 변환
       const draw_start_at = form.draw_start_at
         ? new Date(form.draw_start_at).toISOString()
         : new Date(Date.now() + 60 * 60 * 1000).toISOString();
@@ -186,12 +208,14 @@ export default function AdminProjectNewPage() {
                 </div>
               </div>
               <div className="space-y-1">
-                <Label>추첨 주기 (분, 60~10080)</Label>
+                <Label>추첨 주기 (일, 1~7일)</Label>
                 <Input
                   type="number"
-                  value={form.draw_interval_minutes}
+                  min={1}
+                  max={7}
+                  value={form.draw_interval_minutes / 1440}
                   onChange={(e) =>
-                    set("draw_interval_minutes", Number(e.target.value))
+                    set("draw_interval_minutes", Number(e.target.value) * 1440)
                   }
                 />
               </div>
@@ -248,9 +272,18 @@ export default function AdminProjectNewPage() {
                   </Button>
                 </div>
               ))}
-              <Button variant="outline" size="sm" onClick={addPolicy}>
-                + 행 추가
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={addPolicy}>
+                  + 행 추가
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsPoliciesAtDefault(true)}
+                >
+                  초기화
+                </Button>
+              </div>
             </div>
           )}
 
@@ -317,7 +350,7 @@ export default function AdminProjectNewPage() {
                   {form.number_min}~{form.number_max}, {form.pick_count}개 선택
                 </span>
                 <span className="text-muted-foreground">추첨 주기</span>
-                <span className="font-medium">{form.draw_interval_minutes}분</span>
+                <span className="font-medium">{form.draw_interval_minutes / 1440}일</span>
                 <span className="text-muted-foreground">무료 기회</span>
                 <span className="font-medium">
                   {form.free_chance_period_minutes}분마다 {form.free_chances_per_period}회

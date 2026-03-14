@@ -28,8 +28,6 @@ export function Countdown({ targetDate, onComplete }: CountdownProps) {
   );
 
   useEffect(() => {
-    setRemaining(getRemainingSeconds(targetDate));
-
     const timer = setInterval(() => {
       const next = getRemainingSeconds(targetDate);
       setRemaining(next);

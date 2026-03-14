@@ -59,6 +59,25 @@ function PlayPageContent({ projectId }: { projectId: string }) {
     fetchProject();
   }, [fetchProject]);
 
+  // 기회 없으면 이벤트 메인으로 리다이렉트 (2차 차단)
+  useEffect(() => {
+    if (!userid) return;
+    fetch(`/api/event/${projectId}/chances?user_id=${userid}`)
+      .then((r) => r.json())
+      .then((json) => {
+        if (!json.data) return;
+        const blocked =
+          entryType === "free"
+            ? (json.data.free_remaining ?? 0) === 0
+            : (json.data.ad_remaining ?? 0) === 0;
+        if (blocked) {
+          toast.error("참여 기회가 없습니다.");
+          router.replace(`/event/${projectId}?userid=${userid}`);
+        }
+      })
+      .catch(() => {});
+  }, [projectId, userid, entryType, router]);
+
   if (loading) {
     return (
       <div className="p-4 space-y-5">

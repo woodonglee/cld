@@ -19,7 +19,7 @@ const createProjectSchema = z
     draw_interval_minutes: z
       .number()
       .int()
-      .min(60, "추첨 주기는 최소 60분입니다.")
+      .min(1440, "추첨 주기는 최소 1일(1440분)입니다.")
       .max(10080, "추첨 주기는 최대 10080분(1주)입니다."),
     draw_start_at: z.string().datetime({ offset: true }).or(z.string().min(1)),
     free_chances_per_period: z.number().int().min(0),

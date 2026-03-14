@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
+export const dynamic = "force-dynamic";
+
 // Fisher-Yates shuffle로 범위 내 랜덤 번호 pick_count개 추출
 function pickRandomNumbers(min: number, max: number, count: number): number[] {
   const range = Array.from({ length: max - min + 1 }, (_, i) => i + min);

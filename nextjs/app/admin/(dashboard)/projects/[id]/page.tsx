@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -64,6 +66,11 @@ export default function AdminProjectDetailPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [testUserId, setTestUserId] = useState("");
+
+  useEffect(() => {
+    setTestUserId(crypto.randomUUID());
+  }, []);
 
   const fetchAll = useCallback(async () => {
     try {
@@ -187,7 +194,13 @@ export default function AdminProjectDetailPage() {
                 <span className="text-muted-foreground">선택 개수</span>
                 <span>{project.pick_count}개</span>
                 <span className="text-muted-foreground">추첨 주기</span>
-                <span>{project.draw_interval_minutes}분</span>
+                <span>
+                  {project.draw_interval_minutes % 1440 === 0
+                    ? `${project.draw_interval_minutes / 1440}일`
+                    : project.draw_interval_minutes % 60 === 0
+                    ? `${project.draw_interval_minutes / 60}시간`
+                    : `${project.draw_interval_minutes}분`}
+                </span>
                 <span className="text-muted-foreground">무료 기회</span>
                 <span>{project.free_chance_period_minutes}분마다 {project.free_chances_per_period}회</span>
                 <span className="text-muted-foreground">광고 기회</span>
@@ -222,6 +235,35 @@ export default function AdminProjectDetailPage() {
                   </TableBody>
                 </Table>
               )}
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle>이용자 테스트 접속</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-1">
+                <Label className="text-sm">테스트 사용자 ID</Label>
+                <Input
+                  value={testUserId}
+                  onChange={(e) => setTestUserId(e.target.value)}
+                  className="font-mono text-sm"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setTestUserId(crypto.randomUUID())}
+                >
+                  새 ID 생성
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => window.open(`/event/${id}?userid=${testUserId}`, "_blank")}
+                  disabled={!testUserId}
+                >
+                  이용자로 접속
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

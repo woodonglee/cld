@@ -37,7 +37,7 @@ export default function AdminLoginPage() {
     if (result?.error) {
       toast.error(result.error);
     } else {
-      window.location.href = "/admin";
+      router.push("/admin");
     }
   };
 
